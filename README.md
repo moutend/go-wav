@@ -1,8 +1,9 @@
 # go-wav
-
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
+[![CircleCI](https://circleci.com/gh/moutend/go-wav.svg?style=svg&circle-token=061fd653f2060a1e94c802811f27b3ef8d5bb9ec)][status]
 
 [license]: https://github.com/moutend/go-wave/blob/master/LICENSE
+[status]: https://circleci.com/gh/moutend/go-wav
 
 Package `go-wav` reads and writes WAV file.
 
