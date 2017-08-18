@@ -109,6 +109,11 @@ func (v *File) Bytes() []byte {
 	return v.data
 }
 
+// String returns textual representation of audio.
+func (v *File) String() string {
+	return fmt.Sprintf("%v kHz / %v bit %v channel(s)", v.SamplesPerSec(), v.BitsPerSample(), v.Channels())
+}
+
 // Float64s returns audio samples as slice of float64.
 func (v *File) Float64s() []float64 {
 	const scale = 1 << 31
@@ -140,7 +145,7 @@ func (v *File) Int32s() []int32 {
 }
 
 func (v *File) fromS8ToInt32s() []int32 {
-	const scale = 2 << 23
+	const scale = 1 << 24
 	samples := v.Samples()
 	s8 := make([]int8, samples)
 	s32 := make([]int32, samples)
@@ -155,7 +160,7 @@ func (v *File) fromS8ToInt32s() []int32 {
 }
 
 func (v *File) fromS16ToInt32s() []int32 {
-	const scale = 2 << 15
+	const scale = 1 << 16
 	samples := v.Samples()
 	s16 := make([]int16, samples)
 	s32 := make([]int32, samples)
@@ -170,7 +175,7 @@ func (v *File) fromS16ToInt32s() []int32 {
 }
 
 func (v *File) fromS24ToInt32s() []int32 {
-	const scale = 2 << 7
+	const scale = 1 << 8
 	length := v.Length()
 	samples := v.Samples()
 	data := make([]byte, samples*4)
@@ -288,11 +293,6 @@ func Marshal(v *File) (stream []byte, err error) {
 	stream = buf.Bytes()
 
 	return
-}
-
-// String returns textual representation of audio.
-func (v *File) String() string {
-	return fmt.Sprintf("%v kHz / %v bit %v channel(s)", v.SamplesPerSec(), v.BitsPerSample(), v.Channels())
 }
 
 func getChannelMask(c uint16) (mask uint32) {
