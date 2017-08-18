@@ -125,56 +125,81 @@ func (v *File) Bytes() []byte {
 }
 
 func (v *File) fromS8ToInt32s() []int32 {
-	var output = make([]int32, v.Samples()*4)
-	return output
+	const scale = 2 << 23
+	samples := v.Samples()
+	s8 := make([]int8, samples)
+	s32 := make([]int32, samples)
+
+	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s8)
+
+	for i := 0; i < samples; i++ {
+		s32[i] = int32(s8[i]) * scale
+	}
+
+	return s32
 }
 
 func (v *File) fromS16ToInt32s() []int32 {
 	const scale = 2 << 15
-	var samples = v.Samples()
-	var s32 = make([]int32, samples)
-	var s16 = make([]int16, samples)
+	samples := v.Samples()
+	s16 := make([]int16, samples)
+	s32 := make([]int32, samples)
 
 	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s16)
 
 	for i := 0; i < samples; i++ {
 		s32[i] = int32(s16[i]) * scale
 	}
+
 	return s32
 }
 
-func (v *File) fromS24ToS32() []byte {
-	var length = v.Length()
-	var output = make([]byte, v.Samples()*4)
-	var n int
+func (v *File) fromS24ToInt32s() []int32 {
+	const scale = 2 << 7
+	length := v.Length()
+	samples := v.Samples()
+	data := make([]byte, samples*4)
+	s32 := make([]int32, samples)
 
 	for i := 0; i < length; i += 3 {
-		n = (i / 3) + 1
-		output[n+i] = v.data[i]
-		output[n+i+1] = v.data[i+1]
-		output[n+i+2] = v.data[i+2]
+		n := (i / 3) + 1
+		data[n+i] = v.data[i]
+		data[n+i+1] = v.data[i+1]
+		data[n+i+2] = v.data[i+2]
 	}
-	return output
+
+	binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &s32)
+
+	for i := 0; i < samples; i++ {
+		s32[i] *= scale
+	}
+
+	return s32
+}
+
+func (v *File) fromS32ToInt32s() []int32 {
+	samples := v.Samples()
+	s32 := make([]int32, samples)
+
+	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s32)
+
+	return s32
 }
 
 // Int32s returns audio samples as slice of int32.
 func (v *File) Int32s() []int32 {
-	var input []byte
-	var output = make([]int32, v.Samples())
-
 	switch v.BitsPerSample() {
 	case 8:
 		return v.fromS8ToInt32s()
 	case 16:
 		return v.fromS16ToInt32s()
 	case 24:
-		input = v.fromS24ToS32()
+		return v.fromS24ToInt32s()
 	case 32:
-		input = v.data
+		return v.fromS32ToInt32s()
+	default:
+		return []int32{}
 	}
-	binary.Read(bytes.NewBuffer(input), binary.LittleEndian, &output)
-
-	return output
 }
 
 // Float64s returns audio samples as slice of float64.
