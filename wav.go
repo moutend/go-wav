@@ -27,21 +27,6 @@ type File struct {
 	offset         int
 }
 
-func getChannelMask(c uint16) (mask uint32) {
-	if c == 1 {
-		mask = 0x4
-	} else if c == 2 {
-		mask = 0x3 //
-	} else if c == 4 {
-		mask = 0x33
-	} else if c == 6 {
-		mask = 0x3f
-	} else if c == 8 {
-		mask = 0x63f
-	}
-	return
-}
-
 // Duration returns playback time in second.
 func (v *File) Duration() time.Duration {
 	return time.Duration(v.Length()/v.BlockAlign()) * time.Second
@@ -124,6 +109,36 @@ func (v *File) Bytes() []byte {
 	return v.data
 }
 
+// Float64s returns audio samples as slice of float64.
+func (v *File) Float64s() []float64 {
+	const scale = 1 << 31
+	samples := v.Samples()
+	s32 := v.Int32s()
+	f64 := make([]float64, samples)
+
+	for i := 0; i < samples; i++ {
+		f64[i] = float64(s32[i]) / scale
+	}
+
+	return f64
+}
+
+// Int32s returns audio samples as slice of int32.
+func (v *File) Int32s() []int32 {
+	switch v.BitsPerSample() {
+	case 8:
+		return v.fromS8ToInt32s()
+	case 16:
+		return v.fromS16ToInt32s()
+	case 24:
+		return v.fromS24ToInt32s()
+	case 32:
+		return v.fromS32ToInt32s()
+	default:
+		return []int32{}
+	}
+}
+
 func (v *File) fromS8ToInt32s() []int32 {
 	const scale = 2 << 23
 	samples := v.Samples()
@@ -184,36 +199,6 @@ func (v *File) fromS32ToInt32s() []int32 {
 	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s32)
 
 	return s32
-}
-
-// Int32s returns audio samples as slice of int32.
-func (v *File) Int32s() []int32 {
-	switch v.BitsPerSample() {
-	case 8:
-		return v.fromS8ToInt32s()
-	case 16:
-		return v.fromS16ToInt32s()
-	case 24:
-		return v.fromS24ToInt32s()
-	case 32:
-		return v.fromS32ToInt32s()
-	default:
-		return []int32{}
-	}
-}
-
-// Float64s returns audio samples as slice of float64.
-func (v *File) Float64s() (f64 []float64) {
-	const resolution = 2147483648
-	var samples = v.Samples()
-	var s32 = v.Int32s()
-
-	f64 = make([]float64, samples)
-
-	for i := 0; i < samples; i++ {
-		f64[i] = float64(s32[i]) / resolution
-	}
-	return
 }
 
 // Unmarshal parses WAV formatted audio and store data into *File.
@@ -308,6 +293,21 @@ func Marshal(v *File) (stream []byte, err error) {
 // String returns textual representation of audio.
 func (v *File) String() string {
 	return fmt.Sprintf("%v kHz / %v bit %v channel(s)", v.SamplesPerSec(), v.BitsPerSample(), v.Channels())
+}
+
+func getChannelMask(c uint16) (mask uint32) {
+	if c == 1 {
+		mask = 0x4
+	} else if c == 2 {
+		mask = 0x3 //
+	} else if c == 4 {
+		mask = 0x33
+	} else if c == 6 {
+		mask = 0x3f
+	} else if c == 8 {
+		mask = 0x63f
+	}
+	return
 }
 
 // New creates an empty File.
