@@ -130,18 +130,25 @@ func (v *File) Float64s() []float64 {
 
 // Int32s returns audio samples as slice of int32.
 func (v *File) Int32s() []int32 {
+	var s32 []byte
+
 	switch v.BitsPerSample() {
 	case 8:
-		return v.fromS8ToInt32s()
+		s32 = v.FromU8ToS32()
 	case 16:
-		return v.fromS16ToInt32s()
+		s32 = v.FromS16ToS32()
 	case 24:
-		return v.fromS24ToInt32s()
+		s32 = v.FromS24ToS32()
 	case 32:
-		return v.fromS32ToInt32s()
+		s32 = v.data
 	default:
 		return []int32{}
 	}
+
+	i32 := make([]int32, v.Samples())
+	binary.Read(bytes.NewBuffer(s32), binary.LittleEndian, &i32)
+
+	return i32
 }
 
 func (v *File) fromS8ToInt32s() []int32 {
@@ -238,6 +245,18 @@ func (v *File) FromS8ToS32() []byte {
 
 	for i := 0; i < length; i++ {
 		s32[i*4+3] = data[i]
+	}
+
+	return s32
+}
+
+func (v *File) FromU8ToS32() []byte {
+	length := v.Length()
+	data := v.data
+	s32 := make([]byte, length*4)
+
+	for i := 0; i < length; i++ {
+		s32[i*4+3] = data[i] + 128
 	}
 
 	return s32
