@@ -151,69 +151,6 @@ func (v *File) Int32s() []int32 {
 	return i32
 }
 
-func (v *File) fromS8ToInt32s() []int32 {
-	const scale = 1 << 24
-	samples := v.Samples()
-	s8 := make([]int8, samples)
-	s32 := make([]int32, samples)
-
-	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s8)
-
-	for i := 0; i < samples; i++ {
-		s32[i] = int32(s8[i]) * scale
-	}
-
-	return s32
-}
-
-func (v *File) fromS16ToInt32s() []int32 {
-	const scale = 1 << 16
-	samples := v.Samples()
-	s16 := make([]int16, samples)
-	s32 := make([]int32, samples)
-
-	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s16)
-
-	for i := 0; i < samples; i++ {
-		s32[i] = int32(s16[i]) * scale
-	}
-
-	return s32
-}
-
-func (v *File) fromS24ToInt32s() []int32 {
-	//const scale = 1 << 8
-	length := v.Length()
-	samples := v.Samples()
-	data := make([]byte, samples*4)
-	s32 := make([]int32, samples)
-
-	for i := 0; i < length; i += 3 {
-		//n := (i / 3) + 1
-		n := i / 3
-		data[n+i] = v.data[i]
-		data[n+i+1] = v.data[i+1]
-		data[n+i+2] = v.data[i+2]
-	}
-
-	binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &s32)
-
-	for i := 0; i < samples; i++ {
-		//s32[i] *= scale
-	}
-
-	return s32
-}
-
-func (v *File) fromS32ToInt32s() []int32 {
-	samples := v.Samples()
-	s32 := make([]int32, samples)
-
-	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s32)
-
-	return s32
-}
-
 func (v *File) FromS8ToS16() []byte {
 	length := v.Length()
 	data := v.data
