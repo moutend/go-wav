@@ -175,14 +175,15 @@ func (v *File) fromS16ToInt32s() []int32 {
 }
 
 func (v *File) fromS24ToInt32s() []int32 {
-	const scale = 1 << 8
+	//const scale = 1 << 8
 	length := v.Length()
 	samples := v.Samples()
 	data := make([]byte, samples*4)
 	s32 := make([]int32, samples)
 
 	for i := 0; i < length; i += 3 {
-		n := (i / 3) + 1
+		//n := (i / 3) + 1
+		n := i / 3
 		data[n+i] = v.data[i]
 		data[n+i+1] = v.data[i+1]
 		data[n+i+2] = v.data[i+2]
@@ -191,7 +192,7 @@ func (v *File) fromS24ToInt32s() []int32 {
 	binary.Read(bytes.NewBuffer(data), binary.LittleEndian, &s32)
 
 	for i := 0; i < samples; i++ {
-		s32[i] *= scale
+		//s32[i] *= scale
 	}
 
 	return s32
@@ -204,6 +205,158 @@ func (v *File) fromS32ToInt32s() []int32 {
 	binary.Read(bytes.NewBuffer(v.data), binary.LittleEndian, &s32)
 
 	return s32
+}
+
+func (v *File) FromS8ToS16() []byte {
+	length := v.Length()
+	data := v.data
+	s16 := make([]byte, length*2)
+
+	for i := 0; i < length; i++ {
+		s16[i*2+1] = data[i]
+	}
+
+	return s16
+}
+
+func (v *File) FromS8ToS24() []byte {
+	length := v.Length()
+	data := v.data
+	s24 := make([]byte, length*3)
+
+	for i := 0; i < length; i++ {
+		s24[i*3+2] = data[i]
+	}
+
+	return s24
+}
+
+func (v *File) FromS8ToS32() []byte {
+	length := v.Length()
+	data := v.data
+	s32 := make([]byte, length*4)
+
+	for i := 0; i < length; i++ {
+		s32[i*4+3] = data[i]
+	}
+
+	return s32
+}
+
+func (v *File) FromS16ToS8() []byte {
+	length := v.Length() / 2
+	data := v.data
+	s8 := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		s8[i] = data[i*2+1]
+	}
+
+	return s8
+}
+
+func (v *File) FromS16ToS24() []byte {
+	length := v.Length()
+	data := v.data
+	s24 := make([]byte, length*3/2)
+
+	for i := 0; i < length; i += 2 {
+		s24[i*3/2+1] = data[i]
+		s24[i*3/2+2] = data[i+1]
+	}
+
+	return s24
+}
+
+func (v *File) FromS16ToS32() []byte {
+	length := v.Length()
+	data := v.data
+	s32 := make([]byte, length*2)
+
+	for i := 0; i < length; i += 2 {
+		s32[i*2+2] = data[i]
+		s32[i*2+3] = data[i+1]
+	}
+
+	return s32
+}
+
+func (v *File) FromS24ToS8() []byte {
+	length := v.Length()
+	data := v.data
+	s8 := make([]byte, length/3)
+
+	for i := 0; i < length; i += 3 {
+		s8[i/3] = data[i+2]
+	}
+
+	return s8
+}
+
+func (v *File) FromS24ToS16() []byte {
+	length := v.Length()
+	data := v.data
+	s16 := make([]byte, length/3*2)
+
+	for i := 0; i < length; i += 3 {
+		s16[i/3*2] = data[i+1]
+		s16[i/3*2+1] = data[i+2]
+	}
+
+	return s16
+}
+
+func (v *File) FromS24ToS32() []byte {
+	length := v.Length()
+	data := v.data
+	s32 := make([]byte, length/3*4)
+
+	for i := 0; i < length; i += 3 {
+		s32[i/3*4+1] = data[i]
+		s32[i/3*4+2] = data[i+1]
+		s32[i/3*4+3] = data[i+2]
+	}
+
+	return s32
+}
+
+func (v *File) FromS32ToS8() []byte {
+	length := v.Length()
+	data := v.data
+	s8 := make([]byte, length/4)
+
+	for i := 0; i < length; i += 4 {
+		s8[i/4] = data[i+3]
+	}
+
+	return s8
+}
+
+func (v *File) FromS32ToS16() []byte {
+	length := v.Length()
+	data := v.data
+	s16 := make([]byte, length/4*2)
+
+	for i := 0; i < length; i += 4 {
+		s16[i/4*2] = data[i+2]
+		s16[i/4*2+1] = data[i+3]
+	}
+
+	return s16
+}
+
+func (v *File) FromS32ToS24() []byte {
+	length := v.Length()
+	data := v.data
+	s24 := make([]byte, length/4*3)
+
+	for i := 0; i < length; i += 4 {
+		s24[i/4*3] = data[i+1]
+		s24[i/4*3+1] = data[i+2]
+		s24[i/4*3+2] = data[i+3]
+	}
+
+	return s24
 }
 
 // Unmarshal parses WAV formatted audio and store data into *File.
