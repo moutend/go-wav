@@ -134,11 +134,11 @@ func (v *File) Int32s() []int32 {
 
 	switch v.BitsPerSample() {
 	case 8:
-		s32 = v.FromU8ToS32()
+		s32 = v.fromU8ToS32()
 	case 16:
-		s32 = v.FromS16ToS32()
+		s32 = v.fromS16ToS32()
 	case 24:
-		s32 = v.FromS24ToS32()
+		s32 = v.fromS24ToS32()
 	case 32:
 		s32 = v.data
 	default:
@@ -151,7 +151,67 @@ func (v *File) Int32s() []int32 {
 	return i32
 }
 
-func (v *File) FromS8ToS16() []byte {
+// S8 returns audio samples as byte slice which is encoded 8 bit signed integer.
+func (v *File) S8() []byte {
+	switch v.BitsPerSample() {
+	case 8:
+	// return v.fromU8ToS8()
+	case 16:
+		return v.fromS16ToS8()
+	case 24:
+		return v.fromS24ToS8()
+	case 32:
+		return v.fromS32ToS8()
+	}
+	return []byte{}
+}
+
+// S16 returns audio samples as byte slice which is encoded 16 bit signed integer.
+func (v *File) S16() []byte {
+	switch v.BitsPerSample() {
+	case 8:
+	// return v.fromU8ToS16()
+	case 16:
+		return v.data
+	case 24:
+		return v.fromS24ToS16()
+	case 32:
+		return v.fromS32ToS16()
+	}
+	return []byte{}
+}
+
+// S24 returns audio samples as byte slice which is encoded 24 bit signed integer.
+func (v *File) S24() []byte {
+	switch v.BitsPerSample() {
+	case 8:
+	// return v.fromU8ToS24()
+	case 16:
+		return v.fromS16ToS24()
+	case 24:
+		return v.data
+	case 32:
+		return v.fromS32ToS24()
+	}
+	return []byte{}
+}
+
+// S32 returns audio samples as byte slice which is encoded 32 bit signed integer.
+func (v *File) S32() []byte {
+	switch v.BitsPerSample() {
+	case 8:
+	// return v.fromU8ToS32()
+	case 16:
+		return v.fromS16ToS32()
+	case 24:
+		return v.fromS24ToS32()
+	case 32:
+		return v.data
+	}
+	return []byte{}
+}
+
+func (v *File) fromS8ToS16() []byte {
 	length := v.Length()
 	data := v.data
 	s16 := make([]byte, length*2)
@@ -163,7 +223,7 @@ func (v *File) FromS8ToS16() []byte {
 	return s16
 }
 
-func (v *File) FromS8ToS24() []byte {
+func (v *File) fromS8ToS24() []byte {
 	length := v.Length()
 	data := v.data
 	s24 := make([]byte, length*3)
@@ -175,7 +235,7 @@ func (v *File) FromS8ToS24() []byte {
 	return s24
 }
 
-func (v *File) FromS8ToS32() []byte {
+func (v *File) fromS8ToS32() []byte {
 	length := v.Length()
 	data := v.data
 	s32 := make([]byte, length*4)
@@ -187,7 +247,7 @@ func (v *File) FromS8ToS32() []byte {
 	return s32
 }
 
-func (v *File) FromU8ToS32() []byte {
+func (v *File) fromU8ToS32() []byte {
 	length := v.Length()
 	data := v.data
 	s32 := make([]byte, length*4)
@@ -199,7 +259,7 @@ func (v *File) FromU8ToS32() []byte {
 	return s32
 }
 
-func (v *File) FromS16ToS8() []byte {
+func (v *File) fromS16ToS8() []byte {
 	length := v.Length() / 2
 	data := v.data
 	s8 := make([]byte, length)
@@ -211,7 +271,7 @@ func (v *File) FromS16ToS8() []byte {
 	return s8
 }
 
-func (v *File) FromS16ToS24() []byte {
+func (v *File) fromS16ToS24() []byte {
 	length := v.Length()
 	data := v.data
 	s24 := make([]byte, length*3/2)
@@ -224,7 +284,7 @@ func (v *File) FromS16ToS24() []byte {
 	return s24
 }
 
-func (v *File) FromS16ToS32() []byte {
+func (v *File) fromS16ToS32() []byte {
 	length := v.Length()
 	data := v.data
 	s32 := make([]byte, length*2)
@@ -237,7 +297,7 @@ func (v *File) FromS16ToS32() []byte {
 	return s32
 }
 
-func (v *File) FromS24ToS8() []byte {
+func (v *File) fromS24ToS8() []byte {
 	length := v.Length()
 	data := v.data
 	s8 := make([]byte, length/3)
@@ -249,7 +309,7 @@ func (v *File) FromS24ToS8() []byte {
 	return s8
 }
 
-func (v *File) FromS24ToS16() []byte {
+func (v *File) fromS24ToS16() []byte {
 	length := v.Length()
 	data := v.data
 	s16 := make([]byte, length/3*2)
@@ -262,7 +322,7 @@ func (v *File) FromS24ToS16() []byte {
 	return s16
 }
 
-func (v *File) FromS24ToS32() []byte {
+func (v *File) fromS24ToS32() []byte {
 	length := v.Length()
 	data := v.data
 	s32 := make([]byte, length/3*4)
@@ -276,7 +336,7 @@ func (v *File) FromS24ToS32() []byte {
 	return s32
 }
 
-func (v *File) FromS32ToS8() []byte {
+func (v *File) fromS32ToS8() []byte {
 	length := v.Length()
 	data := v.data
 	s8 := make([]byte, length/4)
@@ -288,7 +348,7 @@ func (v *File) FromS32ToS8() []byte {
 	return s8
 }
 
-func (v *File) FromS32ToS16() []byte {
+func (v *File) fromS32ToS16() []byte {
 	length := v.Length()
 	data := v.data
 	s16 := make([]byte, length/4*2)
@@ -301,7 +361,7 @@ func (v *File) FromS32ToS16() []byte {
 	return s16
 }
 
-func (v *File) FromS32ToS24() []byte {
+func (v *File) fromS32ToS24() []byte {
 	length := v.Length()
 	data := v.data
 	s24 := make([]byte, length/4*3)
