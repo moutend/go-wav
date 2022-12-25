@@ -29,7 +29,7 @@ type File struct {
 
 // Duration returns playback time in second.
 func (v *File) Duration() time.Duration {
-	return time.Duration(v.Length()/v.BlockAlign()) * time.Second
+	return time.Duration(v.Length()*1/v.BlockAlign()*1/v.SamplesPerSec()) * time.Second
 }
 
 // FormatTag returns either
